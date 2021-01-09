@@ -10,9 +10,178 @@
 
 (println "Cleanliness is next to godliness")
 
-(defn train 
-  []
-  (println "Choo choo!"))
+;;Functions
+(fn [x] (* x x))
+((fn [x] (* x x)) 2)
+(def square (fn [x] (* x x)))
+(square 3)
+(defn square2 [x] (* x x))
+(square2 10)
+
+(defn meditate [s calm]
+  (println "Clojure Meditate v1.0")
+  (if calm 
+    (clojure.string/capitalize s)
+    (str (clojure.string/upper-case s) "!")))
+
+(meditate "haha" false)
+
+(defn meditate2 [s calmness-level]
+  (if (< calmness-level 5)
+      (clojure.string/capitalize s)
+      (if (and (> calmness-level 5) (< calmness-level 10))
+        (clojure.string/upper-case s)
+        (clojure.string/reverse s)))
+)
+
+(meditate2 "abrakadabra" 1)
+(meditate2 "abrakadabra" 6)
+(meditate2 "abrakadabra" 10 )
+
+
+
+(def base-co2 382)
+(def base-year 2006)
+
+(defn co2-estimate 
+  "Estimates co2 level for year `year`"
+  [year]  
+  (let [year-diff (- year base-year)]
+    (+ base-co2 (* year-diff 2)))
+)
+
+(co2-estimate 2050)
+
+
+
+(defn encode-letter
+  [s w]
+  (let [code (Math/pow (+ w (int (first (char-array s)))) 2)]
+    (str "#" (int code))))
+
+(encode-letter "a" 1)
+
+(defn encode
+  [s]
+  (let [number-of-words (count (clojure.string/split s #" "))]
+    (clojure.string/replace s #"\w" (fn [s] (encode-letter s number-of-words)))))
+
+(defn decode-letter
+  [x y]
+  (let [number (Integer/parseInt (subs x 1))
+        letter (char (- (Math/sqrt number) y))]
+    (str letter)))
+
+(defn decode [s]
+  (let [number-of-words (count (clojure.string/split s #" "))]
+    (clojure.string/replace s #"\#\d+" (fn [s] (decode-letter s number-of-words)))))
+
+(encode "Hello Wrold")
+(decode *1)
+
+
+(def fruit {:name "Kiwi", :color "green", :kcal 61})
+(def fruit2 (hash-map :name "Kiwi", :color "green", :kcal 61))
+(get fruit :name)
+(get fruit :taste "default")
+(fruit :name)
+(:name fruit)
+(:shape fruit "egg-like")
+(assoc fruit :shape "egg-like") 
+(assoc fruit :color "brown") 
+(update fruit :kcal dec)
+(update fruit :kcal - 3)
+(dissoc fruit :kcal)
+
+#{1 2 3 4 5 }
+(hash-set :a :b :c :d)
+(set [1 2 3 4 5 5 5 5 5])
+(sorted-set 1 2 3 4 5 5 5 5 5)
+
+[1 2 3]
+(vector 1 2 3)
+(vec #{1 2 3})
+[nil :keyword "String" {:answers [:yep :nope]}]
+(get [:a :b :c] 0)
+
+
+
+(def fibonacci [0 1 1 2 3 5 8])
+
+(let [size (count fibonacci)
+      last-number (last fibonacci)
+      second-to-last-number (fibonacci (- size 2))]
+  (conj fibonacci (+ last-number second-to-last-number)))
+
+(1 2 3 4) ;;list represent code
+'(1 2 3 4) ;; list represent list
+(+ 1 2 3 4) ;;list represent code
+'(+ 1 2 3 4) ;; list represent list
+(list :a :b :c)
+(first '(:a :b :c :d))
+(rest '(:a :b :c :d))
+(nth '(:a :b :c :d) 2)
+(cons -1 fibonacci)
+(conj fibonacci 13 21)
+
+
+(def language {:name "Clojure", :creator "Rich Hickey", :platforms ["Java" "JavaScript" ".NET"]})
+(seq language)
+(nth (seq language) 1)
+(last language)
+(first #{:a :b :c})
+(rest #{:a :b :c})
+
+(into [1 2 3 4] #{5 6 7 8}) 
+(into #{1 2 3 4} [5 6 7 8])
+(into {} [[:a 1] [:b 2] [:c 3]])
+(into '() [1 2 3 4])
+  
+(concat '(1 2) '(3 4))
+(into '(1 2) '(3 4))
+(concat #{1 2 3} #{1 2 3 4}) ;; return a sequence
+(sort [3 7 5 1 9]) ;;returns a sequence
+(into [] (sort [3 7 5 1 9]))
+
+get-in
+update-in
+assoc-in
+
+
+
+
+(def memory-db (atom {}))
+(defn read-db [] @memory-db)
+(defn write-db [new-db] (reset! memory-db new-db))
+
+(defn create-table [table-name]
+  (let [new-table {:data [], :indexes {} }]
+    (write-db (assoc (read-db) table-name new-table))))
+
+(defn remove-table [table-name]
+  (write-db (dissoc (read-db) table-name)))
+
+(defn insert [table-name record id-key]
+  (let [db (read-db)
+        new-db (update-in db [table-name :data] conj record)
+        index (-(count(get-in new-db [table-name :data])) 1)]
+    (write-db (update-in new-db [table-name :indexes id-key] assoc (id-key record) index))))
+
+(defn select-* [table-name] 
+  (get-in (read-db) [table-name :data]))
+
+(defn select-*-where [table-name field field-value]
+  (get-in (read-db) [table-name :data (get-in (read-db) [table-name :indexes field field-value])]))
+
+(read-db)
+(create-table :a)
+(create-table :b)
+(create-table :c)
+(remove-table :c)
+(insert :c {:color "red", :shape "circle"} :color)
+(select-* :c)
+(select-*-where :c :color "red")
+
 
 (defn print-coords [coords] 
   (let [[lat lon] coords]
