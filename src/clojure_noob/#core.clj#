@@ -317,12 +317,19 @@ assoc-in
 
 ;;Partial
 (def marketing-adder (partial + 0.99))
-(def format-price (partial str "$"))
-
 (marketing-adder 10 5)
-(format-price 100)
 
-(defn sample [coll] (first (shuffle coll)))
-(defn sample (comp first shuffle))
-(sample [1 2 3 4])
+(def format-price (partial str "$"))
+(format-price 1.10)
+
+((comp inc *) 2 2)
+
+(def checkout (comp (partial str "Only ") format-price marketing-adder))
+(checkout 10 5 15 6 9)
+
+(fn [s] (str "Hello" s))
+#(str "Hello" %)
+
+(fn [x y] (* (+ x 10) (+ y 20)))
+#(* (+ %1 10) (+ %2 20))
 
